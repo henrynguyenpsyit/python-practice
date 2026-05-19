@@ -41,7 +41,7 @@ def check_cart(cart):
         print(f" ✓  {c['item']} - {c['price']} VND")
     
     total_bought = sum(c["price"] for c in cart if c["bought"])
-    print(f"\n TĐÃ MUA: {total_bought} VND")
+    print(f"\n ĐÃ MUA: {total_bought} VND")
 
     print(f"\n📋 CHƯA MUA {len(unbought_items)}")
     for i, c in enumerate(cart, 1):
@@ -104,11 +104,12 @@ def main():
     CHECK = "Kiểm tra giỏ hàng"
     MARK = "Đánh dấu đã mua"
     DEL = "Xoá món hàng"
+    CLEAR = "Xoá toàn bộ"
     EXIT = "Thoát"
     while True:
         choice = questionary.select(
             "Chọn mục:",
-            choices = [ADD, CHECK, MARK, DEL, EXIT]
+            choices = [ADD, CHECK, MARK, DEL, CLEAR, EXIT]
         ). ask()
         print(choice)
         
@@ -133,8 +134,8 @@ def main():
             elif result == "already":
                 print("Món này đã mua rồi! Hãy chọn lại.")
             else:
-                print(f"Đã mua {result['item']}")
                 save_cart(cart)
+                print(f"Đã mua {result['item']}")
             
         elif choice == DEL:
             check_cart(cart)
@@ -145,10 +146,19 @@ def main():
             confirm = questionary.confirm(f"Bạn chắc chắn muốn xoá {cart[dlt-1]['item']}?").ask()
             if confirm:
                 deleted = delete_item(cart, dlt)
-                print(f"Đã xoá {deleted['item']}")
                 save_cart(cart)
+                print(f"Đã xoá {deleted['item']}")
             else:
                 print("Huỷ xoá")
+
+        elif choice == CLEAR:
+            cnfrm = questionary.confirm(f"Bạn chắc chắn muốn xoá toàn bộ giỏ hàng?").ask()
+            if cnfrm:
+                cart.clear()
+                save_cart(cart)
+                print("Đã xoá toàn bộ giỏ hàng!")
+            else:
+                print("Huỷ bỏ")
 
         elif choice == EXIT:
             print("Chương trình kết thúc. Tạm biệt!")
