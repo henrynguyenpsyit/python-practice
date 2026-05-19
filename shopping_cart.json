@@ -1,0 +1,22 @@
+[
+  {
+    "item": "A",
+    "price": 5000,
+    "bought": false
+  },
+  {
+    "item": "B",
+    "price": 10000,
+    "bought": false
+  },
+  {
+    "item": "C",
+    "price": 20000,
+    "bought": false
+  },
+  {
+    "item": "D",
+    "price": 50000,
+    "bought": true
+  }
+]
