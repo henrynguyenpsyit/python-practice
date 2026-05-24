@@ -1,0 +1,34 @@
+[
+  {
+    "name": "A",
+    "score": 1.0
+  },
+  {
+    "name": "B",
+    "score": 0.5
+  },
+  {
+    "name": "C",
+    "score": 2.0
+  },
+  {
+    "name": "D",
+    "score": 3.0
+  },
+  {
+    "name": "E",
+    "score": 5.0
+  },
+  {
+    "name": "F",
+    "score": 6.0
+  },
+  {
+    "name": "G",
+    "score": 10.0
+  },
+  {
+    "name": "H",
+    "score": 8.0
+  }
+]
