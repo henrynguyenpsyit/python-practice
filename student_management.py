@@ -1,8 +1,8 @@
-import os, questionary, json, prompt_toolkit
-from questionary import Choice, styles
+import os, questionary, json
+from questionary import Choice, Style
 from prompt_toolkit import prompt
 from prompt_toolkit.key_binding import KeyBindings
-
+from rich import print as rprint
 
 FOLDER = os.path.dirname(os.path.abspath(__file__))
 PATH = os.path.join(FOLDER, "student.json")
@@ -14,6 +14,10 @@ AVG = "Trung bình cả lớp"
 DEL = "Xoá/Sửa điểm"
 EXIT = "Thoát"
 
+custom_style = Style([
+    ("pointer",  "fg:#00ff00 bold"),
+    ("highlighted", "fg:#00ff00 bold"),
+])
 
 def add_student(students, name, score):
     students.append({"name": name, "score": score})
@@ -29,10 +33,6 @@ def average_score(students):
         return 0
     return sum(c['score'] for c in students) / len(students)
     
-
-# def delete_score(student, name):
-#     student.pop(name)
-
 
 def ask_key(toolbar_text, keys):
     """Single-key input. Hiện Toolbar dưới, bấm phím trong `keys` để chọn."""
@@ -95,20 +95,24 @@ def main():
     while True:
         choice = questionary.select(
             "_______TOOL QUẢN LÝ HỌC SINH_______",
+            style=custom_style,
             choices = [ADD, LIST, AVG, DEL, EXIT]
         ).ask()
         
+
         if choice == ADD:
             name = ask_nonempty("Nhập tên học sinh: ")
             score = ask_float("Nhập điểm số: ", min_value=0, max_value=10)
             add_student(students, name, score)
             save_list(students)
 
+
         elif choice == LIST:
             student_list(students)
             while True:
                 action = questionary.select(
                     "Thao tác:",
+                    style=custom_style,
                     choices = [
                         Choice("Sắp xếp điểm số từ cao - thấp", value=1),
                         Choice("Sắp xếp điểm từ thấp - cao", value=2),
@@ -125,12 +129,18 @@ def main():
                 elif action == 3:
                     break
             
+
         elif choice == AVG:
             if not students:
                 print("Chưa có HS nào!")
                 continue
             avg = average_score(students)
-            print(f"Điểm trung bình lớp: {avg:.2f}")
+            if avg < 5:
+               rprint(f"Điểm trung bình lớp: [bold red]{avg:.2f}") 
+            elif avg <= 7:
+                rprint(f"Điểm trung bình lớp: [bold yellow]{avg:.2f}")
+            else:
+                rprint(f"Điểm trung bình lớp: [bold green]{avg:.2f}")
             while True:
                 key = ask_key(
                     "[1] Dưới TB | [2] Trên TB | [3] Trên 8đ | [4] Dưới 1đ | [Q] Quay lại",
@@ -153,15 +163,53 @@ def main():
                 action = key
                 filtered = [s for s in students if conditions [action](s)]
                 sorted_list = sorted(filtered, key=lambda s: s['score'])
-                print(f"{labels[action]}: có {len(filtered)} học sinh ")
+                rprint(f"[bold yellow]{labels[action]}[/]: có [red]{len(filtered)}[/] học sinh ")
                 student_list(sorted_list)
             
                     
-        #elif choice == DEL:
+        elif choice == DEL:
+            if not students:
+                print("Không có học sinh!")
+                continue
+            
+            name = ask_nonempty("Nhập tên HS: ")
+            matches = [s for s in students if name.lower() in s['name'].lower()]
+            if not matches:
+                print("Không tìm thấy HS")
+                continue
+            target = questionary.select(
+                "Chọn HS:",
+                style=custom_style,
+                choices = [Choice(f"{s['name']} | {s['score']}đ", value=s) for s in matches],
+            ).ask()
+
+            action = questionary.select(
+                "Thao tác:",
+                style=custom_style,
+                choices = [
+                    Choice("Xoá", value = "del"),
+                    Choice("Sửa điểm", value = "edit"),
+                    Choice("Huỷ bỏ", value="cancel")
+                ]
+            ).ask()
+
+            if action == "del":
+                if questionary.confirm(f"Xoá {target['name']}-{target['score']}đ?").ask():
+                    students.remove(target)
+                    save_list(students)
+                    print(f"Đã xoá HS {target['name']}" )
+
+            elif action == "edit":
+                new_score = ask_float("Nhập điểm mới: ", min_value=0, max_value=10)
+                target['score'] = new_score
+                save_list(students)
+                print(f"Đã sửa điểm HS {target['name']}: {new_score}")
+
 
         elif choice == EXIT:
             print("Chương trình kết thúc. Hẹn gặp lại!")
             break
+
 
 if __name__ == "__main__":
     main()
